@@ -141,6 +141,23 @@
   <!-- Toast Notification System Container -->
   <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
+  <!-- CUSTOM CONFIRMATION MODAL -->
+  <div id="custom-confirm-modal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+    <div class="bg-white max-w-sm w-full p-6 rounded-3xl border border-slate-100 shadow-2xl text-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
+      <div class="w-12 h-12 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto border border-red-100">
+        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+      </div>
+      <div class="space-y-1">
+        <h3 class="font-bold text-slate-900 text-sm" id="confirm-modal-title">Konfirmasi Tindakan</h3>
+        <p class="text-xs text-slate-500 leading-relaxed" id="confirm-modal-desc">Apakah Anda benar-benar yakin ingin melakukan aksi ini?</p>
+      </div>
+      <div class="flex items-center gap-2 pt-2">
+        <button id="btn-confirm-cancel" class="flex-1 py-2.5 border border-slate-200 text-xs font-bold text-slate-500 rounded-xl hover:bg-slate-50 transition">Batal</button>
+        <button id="btn-confirm-action" class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow-md transition">Ya, Hapus</button>
+      </div>
+    </div>
+  </div>
+
   <div id="app-root" class="hidden">
     
     <!-- SIDEBAR (DESKTOP) -->
@@ -287,7 +304,7 @@
           <div class="glass-card p-5 rounded-2xl flex items-center gap-4">
             <div class="p-3 bg-amber-50 text-amber-600 rounded-xl border"><i data-lucide="alert-triangle" class="w-6 h-6"></i></div>
             <div>
-              <p class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Data Belum Beres</p>
+              <p class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider font-bold">Data Belum Beres</p>
               <h3 class="text-xl font-extrabold text-amber-600 animate-pulse" id="dash-total-warnings">0</h3>
             </div>
           </div>
@@ -1261,6 +1278,7 @@
     });
 
     function initAppShell() {
+      // Reusable Custom Alert Replacer
       window.showToast = (msg, type = "info") => {
         const container = document.getElementById("toast-container");
         const card = document.createElement("div");
@@ -1283,6 +1301,32 @@
         }, 4000);
       };
 
+      // Custom Confirmation Handler Setup
+      const confirmModal = document.getElementById("custom-confirm-modal");
+      const btnCancel = document.getElementById("btn-confirm-cancel");
+      const btnAction = document.getElementById("btn-confirm-action");
+      let confirmCallback = null;
+
+      window.showCustomConfirm = (title, desc, callback) => {
+        document.getElementById("confirm-modal-title").innerText = title;
+        document.getElementById("confirm-modal-desc").innerText = desc;
+        confirmCallback = callback;
+        confirmModal.classList.remove("hidden");
+        lucide.createIcons();
+      };
+
+      btnCancel.addEventListener("click", () => {
+        confirmModal.classList.add("hidden");
+        confirmCallback = null;
+      });
+
+      btnAction.addEventListener("click", () => {
+        confirmModal.classList.add("hidden");
+        if (confirmCallback) confirmCallback();
+        confirmCallback = null;
+      });
+
+      // Local storage mapping configurations
       const savedSchoolConfig = localStorage.getItem("cfg_school");
       if (savedSchoolConfig) localStore.schoolConfig = JSON.parse(savedSchoolConfig);
 
@@ -1354,6 +1398,7 @@
     async function initFirebaseIntegration() {
       const isConfigDemo = document.getElementById("cfg-demo-toggle").checked;
       if (isConfigDemo) return;
+      // Firebase fallback to sandbox database
       bootstrapLocalSandboxedMode();
     }
 
@@ -1664,12 +1709,16 @@
     };
 
     window.deleteExistingStudent = (nisn) => {
-      if (confirm("Apakah Anda yakin ingin menghapus data siswa ini secara permanen?")) {
-        localStore.students = localStore.students.filter(s => s.nisn !== nisn);
-        localStorage.setItem("db_students", JSON.stringify(localStore.students));
-        showToast("Data siswa berhasil didelete.", "info");
-        refreshLocalViews();
-      }
+      showCustomConfirm(
+        "Konfirmasi Hapus Siswa", 
+        "Apakah Anda yakin ingin menghapus data siswa ini secara permanen dari Buku Induk?", 
+        () => {
+          localStore.students = localStore.students.filter(s => s.nisn !== nisn);
+          localStorage.setItem("db_students", JSON.stringify(localStore.students));
+          showToast("Data siswa berhasil dihapus.", "info");
+          refreshLocalViews();
+        }
+      );
     };
 
     function populateMasterMapelCatalog() {
@@ -1736,12 +1785,16 @@
     };
 
     window.deleteMasterMapel = (kode) => {
-      if (confirm(`Hapus pelajaran ${kode}?`)) {
-        localStore.mapels = localStore.mapels.filter(m => m.kode !== kode);
-        localStorage.setItem("cfg_mapels", JSON.stringify(localStore.mapels));
-        showToast("Mata Pelajaran dihapus.", "info");
-        refreshLocalViews();
-      }
+      showCustomConfirm(
+        "Konfirmasi Hapus Mapel", 
+        `Apakah Anda yakin ingin menghapus mata pelajaran [${kode}] dari daftar kurikulum sekolah?`, 
+        () => {
+          localStore.mapels = localStore.mapels.filter(m => m.kode !== kode);
+          localStorage.setItem("cfg_mapels", JSON.stringify(localStore.mapels));
+          showToast("Mata Pelajaran dihapus.", "info");
+          refreshLocalViews();
+        }
+      );
     };
 
     function populateAcademicStudentSelectors() {
@@ -1980,7 +2033,7 @@
             <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">m. Berkebutuhan Khusus</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.berkebutuhan_khusus || "Tidak"}</td></tr>
             <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">n. Riwayat Penyakit</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.riwayat_penyakit || "-"}</td></tr>
             <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">o. Alamat Tempat Tinggal</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.alamat || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">p. Alat Transportasi</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.alat_transportasi || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">p. Alat Transportasi</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.alamat || "-"}</td></tr>
             <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">q. Jenis Tinggal</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.jenis_tinggal || "-"}</td></tr>
             <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">r. No HP/Telepon</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.telepon || "-"}</td></tr>
             <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">s. Penerima KPS/PKH (Ya/Tidak)</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.kps || "Tidak"}</td></tr>
@@ -2631,99 +2684,4 @@
 ```
 eof
 
-```javascript:Firebase Security Rules:firestore.rules
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    
-    // Koleksi data utama siswa SMK
-    match /students/{nisn} {
-      // Admin yang login melalui Firebase Auth bisa membaca dan memanipulasi semua dokumen
-      allow read, write: if request.auth != null;
-      // Siswa non-Auth hanya bisa melihat dokumen miliknya jika password yang dikirimkan cocok
-      allow read: if resource.data.password == request.headers.password;
-    }
-
-    // Koleksi Master Mata Pelajaran & Konfigurasi Sekolah
-    match /metadata/{configId} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-  }
-}
-```
-eof
-
-```markdown:Panduan Penggunaan:panduan.md
-# Panduan Implementasi Buku Induk Digital SMK (PWA)
-
-Aplikasi ini menggunakan arsitektur **Serverless** murni satu file HTML. Seluruh penyimpanan data terhubung ke **Firebase Firestore**, dan aset foto terhubung otomatis ke **Google Drive** menggunakan jembatan Google Apps Script.
-
----
-
-## 1. Setup Jembatan Google Drive (Google Apps Script)
-Untuk menghindari penyimpanan berbayar di Firebase Storage, ikuti langkah berikut agar file foto tersimpan langsung ke akun Google Drive Anda secara gratis:
-
-1. Buka [Google Drive](https://drive.google.com/) Anda, lalu buatlah sebuah folder baru (misal bernama `Foto Buku Induk SMK`).
-2. Masuk ke dalam folder tersebut, salin **Folder ID** dari tautan di bilah alamat browser Anda (Folder ID adalah bagian akhir tautan setelah `/folders/YOUR_FOLDER_ID`).
-3. Kunjungi [Google Apps Script](https://script.google.com/), lalu klik **New Project**.
-4. Hapus seluruh kode bawaan, kemudian tempelkan skrip di bawah ini:
-
-```javascript
-function doPost(e) {
-  try {
-    var data = JSON.parse(e.postData.contents);
-    var folderId = "TEMPEL_FOLDER_ID_GOOGLE_DRIVE_ANDA_DI_SINI"; 
-    var folder = DriveApp.getFolderById(folderId);
-    
-    var contentType = data.mimeType;
-    var base64Data = Utilities.base64Decode(data.base64);
-    var blob = Utilities.newBlob(base64Data, contentType, data.filename);
-    
-    var file = folder.createFile(blob);
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-    
-    var directUrl = "https://lh3.googleusercontent.com/d/" + file.getId();
-    
-    return ContentService.createTextOutput(JSON.stringify({
-      "status": "success",
-      "url": directUrl
-    })).setMimeType(ContentService.MimeType.JSON);
-    
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({
-      "status": "error",
-      "message": error.toString()
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-```
-
-5. Ganti `"TEMPEL_FOLDER_ID_GOOGLE_DRIVE_ANDA_DI_SINI"` dengan Folder ID yang telah Anda salin pada langkah ke-2.
-6. Klik tombol **Deploy** > **New Deployment**.
-7. Pilih jenis deployment **Web App**.
-8. Ubah pengaturannya menjadi:
-   - **Execute as:** `Me` (Akun Google Anda)
-   - **Who has access:** `Anyone` (agar aplikasi web Anda dapat mengirim data tanpa login akun Google tambahan)
-9. Klik **Deploy**, beri izin otorisasi keamanan, lalu salin **Web App URL** yang dihasilkan.
-10. Tempelkan tautan tersebut ke dalam input **Google Apps Script Web App URL** di tab **Pengaturan** aplikasi Buku Induk SMK Anda.
-
----
-
-## 2. Cara Penyematan ke Blogger / Blogspot
-Aplikasi Buku Induk ini dirancang satu file penuh sehingga sangat mudah dipasang langsung ke Blogspot Anda:
-
-1. Masuk ke dasbor **Blogger** Anda.
-2. Pilih menu **Tata Letak (Layout)**.
-3. Klik **Tambahkan Gadget (Add a Widget)** di bagian tubuh halaman utama, lalu pilih **HTML/JavaScript**.
-4. Salin seluruh isi berkas `buku_induk_smk.html` dan tempelkan ke dalam kotak konten widget tersebut.
-5. Klik **Simpan**.
-6. Selesai! Buku Induk PWA berlatar belakang Dapodik bersih kini telah tayang langsung di blog Anda.
-```
-eof
-
-### Ringkasan Pembaruan Berkas:
-*   **Warna & Estetika SMK**: Seluruh visual merah kini berganti menjadi **Biru Navy-Abu-Abu** khas seragam kejuruan SMK, lengkap dengan visual latar belakang edukasi Unsplash premium pada form login.
-*   **Perbaikan Event Propagation**: Menambahkan `event.stopPropagation()` pada tombol aksi agar navigasi perpindahan form saat Edit atau Delete tidak lagi tertabrak dengan event cetak detail.
-*   **Tampilan KOP Sejajar Proporsional**: KOP Surat sekarang berbentuk tabel/flexbox terisolasi sehingga logo sekolah di sisi kiri tidak lagi tumpang tindih dengan teks KOP dan baris tebal pemisah bab.
-*   **Kualitas Format Cetak (PDF)**: Pratinjau cetak Buku Induk didesain ulang agar menghasilkan format yang presisi dengan teks label abu-abu, titik dua yang lurus sejajar, serta isi nilai yang tebal dan berwarna biru navy elegan khas sekolah formal. Pas foto 3x4 diletakkan secara teratur di sisi kanan atas lengkap dengan bingkai ganda biru tua.
+Saya telah membersihkan seluruh kode aplikasi utama **`buku_induk_smk.html`** agar tidak lagi bocor ke bawah halaman dan mengganti tombol konfirmasi bawaan browser dengan modal dialog kustom yang super bersih dan interaktif.
