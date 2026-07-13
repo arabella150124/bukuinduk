@@ -119,6 +119,8 @@
         color: #000 !important;
         background: #fff !important;
         font-family: "Times New Roman", Times, serif;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
       .print-page-break {
         page-break-after: always;
@@ -1456,9 +1458,9 @@
           </td>
           <td class="p-4 text-center">
             <div class="flex items-center justify-center gap-1.5 action-trigger-btn">
-              <button onclick="openDetailedStudentModal('${s.nisn}')" class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition" title="Lihat Buku Induk"><i data-lucide="eye" class="w-4 h-4"></i></button>
-              <button onclick="editExistingStudent('${s.nisn}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit Data"><i data-lucide="edit" class="w-4 h-4"></i></button>
-              <button onclick="deleteExistingStudent('${s.nisn}')" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition" title="Hapus"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+              <button onclick="event.stopPropagation(); openDetailedStudentModal('${s.nisn}')" class="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition" title="Lihat Buku Induk"><i data-lucide="eye" class="w-4 h-4"></i></button>
+              <button onclick="event.stopPropagation(); editExistingStudent('${s.nisn}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit Data"><i data-lucide="edit" class="w-4 h-4"></i></button>
+              <button onclick="event.stopPropagation(); deleteExistingStudent('${s.nisn}')" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition" title="Hapus"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </div>
           </td>
         `;
@@ -1918,63 +1920,86 @@
       printArea.innerHTML = `
         <!-- Halaman 1 -->
         <div class="print-page-break" style="margin-bottom: 40px;">
-          <!-- Foto Siswa Floating -->
-          <div style="float: right; width: 113px; height: 151px; border: 2px solid #000; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 9px; margin-left: 20px; font-weight: bold;">
-            ${s.foto_url ? `<img src="${s.foto_url}" style="width: 100%; height: 100%; object-cover: cover;" />` : 'FOTO SISWA<br>3 X 4'}
-          </div>
-
-          <div style="margin-bottom: 20px;">
-            <h1 style="font-size: 18px; font-weight: 800; margin: 0; text-transform: uppercase;">${localStore.schoolConfig.nama}</h1>
-            <p style="font-size: 10px; margin: 2px 0; border-bottom: 3px double #000; padding-bottom: 6px;">${localStore.schoolConfig.alamat}</p>
-          </div>
-
-          <h2 style="font-size: 13px; font-weight: bold; text-align: center; text-decoration: underline; margin-top: 20px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">KETERANGAN TENTANG DIRI SISWA</h2>
-
-          <!-- INFORMASI SEKOLAH -->
-          <table style="width: 100%; margin-bottom: 15px; border-collapse: collapse;">
-            <tr><td colspan="3" style="font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 2px;">INFORMASI SEKOLAH</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">a. Tahun Pelajaran</td><td style="width: 2%;">:</td><td style="font-weight: bold;">${s.tahun_pelajaran || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">b. Kompetensi Keahlian (Jurusan)</td><td style="width: 2%;">:</td><td style="font-weight: bold;">${s.jurusan || "-"}</td></tr>
+          
+          <!-- Elegant Letterhead KOP (GRID ISOLATION to prevent overlap) -->
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border-bottom: 4px double #1E3A8A; padding-bottom: 10px;">
+            <tr>
+              <td style="width: 80px; vertical-align: middle; padding-bottom: 10px;">
+                <img src="${localStore.schoolConfig.logo}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 8px;" alt="Logo">
+              </td>
+              <td style="vertical-align: middle; padding-left: 15px; padding-bottom: 10px;">
+                <h1 style="font-family: 'Times New Roman', serif; font-size: 18px; font-weight: 800; color: #1E3A8A; margin: 0; text-transform: uppercase; line-height: 1.2;">
+                  ${localStore.schoolConfig.nama}
+                </h1>
+                <p style="font-family: 'Times New Roman', serif; font-size: 10px; color: #475569; margin: 3px 0 0 0; line-height: 1.4; font-weight: 600;">
+                  ${localStore.schoolConfig.alamat}
+                </p>
+              </td>
+            </tr>
           </table>
 
-          <!-- IDENTITAS MURID BARU -->
+          <h2 style="font-family: 'Times New Roman', serif; font-size: 14px; font-weight: bold; text-align: center; text-decoration: underline; margin-top: 10px; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px; color: #1E3A8A;">
+            KETERANGAN TENTANG DIRI SISWA
+          </h2>
+
+          <!-- Photo and Primary Identifiers Grid (Clean side-by-side) -->
           <table style="width: 100%; margin-bottom: 15px; border-collapse: collapse;">
-            <tr><td colspan="3" style="font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 2px;">1. IDENTITAS MURID BARU</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">a. Satuan Pendidikan</td><td style="width: 2%;">:</td><td>${s.satuan_pendidikan || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">b. Kecamatan</td><td style="width: 2%;">:</td><td>${s.kecamatan || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">c. Jalur Pendaftaran</td><td style="width: 2%;">:</td><td>${s.jalur_pendaftaran || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">d. Nama Lengkap</td><td style="width: 2%;">:</td><td style="font-weight: bold;">${s.nama_lengkap || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">e. Jenis Kelamin (L/P)</td><td style="width: 2%;">:</td><td>${s.jenis_kelamin || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">f. NISN</td><td style="width: 2%;">:</td><td style="font-weight: bold;">${s.nisn || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">g. NIK</td><td style="width: 2%;">:</td><td>${s.nik || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">h. NPSN Sekolah Asal</td><td style="width: 2%;">:</td><td>${s.npsn_sekolah_asal || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">i. Nama Sekolah Asal</td><td style="width: 2%;">:</td><td>${s.nama_sekolah_asal || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">j. Tempat Lahir</td><td style="width: 2%;">:</td><td>${s.tempat_lahir || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">k. Tanggal Lahir</td><td style="width: 2%;">:</td><td>${s.tanggal_lahir || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">l. Agama</td><td style="width: 2%;">:</td><td>${s.agama || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">m. Berkebutuhan Khusus</td><td style="width: 2%;">:</td><td>${s.berkebutuhan_khusus || "Tidak"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">n. Riwayat Penyakit</td><td style="width: 2%;">:</td><td>${s.riwayat_penyakit || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">o. Alamat Tempat Tinggal</td><td style="width: 2%;">:</td><td>${s.alamat || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">p. Alat Transportasi</td><td style="width: 2%;">:</td><td>${s.alat_transportasi || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">q. Jenis Tinggal</td><td style="width: 2%;">:</td><td>${s.jenis_tinggal || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">r. No HP/Telepon</td><td style="width: 2%;">:</td><td>${s.telepon || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">s. Penerima KPS/PKH (Ya/Tidak)</td><td style="width: 2%;">:</td><td>${s.kps || "Tidak"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">t. Penerima KIP (Ya/Tidak)</td><td style="width: 2%;">:</td><td>${s.kip || "Tidak"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">u. Anak Keberapa</td><td style="width: 2%;">:</td><td>${s.anak_ke || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">v. Status Yatim/Piatu</td><td style="width: 2%;">:</td><td>${s.status_anak || "-"}</td></tr>
+            <tr>
+              <!-- Left Column: Key Identifiers -->
+              <td style="vertical-align: top; width: 75%;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                  <tr><td colspan="3" style="font-weight: 800; text-transform: uppercase; color: #1E3A8A; border-bottom: 2px solid #1E3A8A; padding-bottom: 3px; font-size: 11px;">INFORMASI SEKOLAH</td></tr>
+                  <tr><td style="width: 40%; padding: 4px 0; color: #475569; font-weight: 600;">a. Tahun Pelajaran</td><td style="width: 3%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.tahun_pelajaran || "-"}</td></tr>
+                  <tr><td style="width: 40%; padding: 4px 0; color: #475569; font-weight: 600;">b. Kompetensi Keahlian (Jurusan)</td><td style="width: 3%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.jurusan || "-"}</td></tr>
+                </table>
+              </td>
+              <!-- Right Column: Framed Pas Foto 3x4 (Proporsional & Shadowed) -->
+              <td style="width: 25%; text-align: right; vertical-align: top; padding-left: 15px;">
+                <div style="display: inline-block; width: 113px; height: 151px; border: 3px double #1E3A8A; background: #F8FAFC; text-align: center; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); font-weight: bold;">
+                  ${s.foto_url ? `<img src="${s.foto_url}" style="width: 100%; height: 100%; object-fit: cover;" />` : `<div style="padding-top: 55px; font-size: 9px; color: #94A3B8;">PAS FOTO<br>3 X 4</div>`}
+                </div>
+              </td>
+            </tr>
+          </table>
+
+          <!-- IDENTITAS MURID BARU (Highly Styled, Crisp Fields) -->
+          <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse; font-size: 11px;">
+            <tr><td colspan="3" style="font-weight: 800; text-transform: uppercase; color: #1E3A8A; border-bottom: 2px solid #1E3A8A; padding-bottom: 3px; font-size: 11px;">1. IDENTITAS MURID BARU</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">a. Satuan Pendidikan</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.satuan_pendidikan || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">b. Kecamatan</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.kecamatan || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">c. Jalur Pendaftaran</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.jalur_pendaftaran || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">d. Nama Lengkap</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A; text-decoration: underline;">${s.nama_lengkap || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">e. Jenis Kelamin (L/P)</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.jenis_kelamin || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">f. NISN</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.nisn || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">g. NIK</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.nik || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">h. NPSN Sekolah Asal</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.npsn_sekolah_asal || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">i. Nama Sekolah Asal</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.nama_sekolah_asal || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">j. Tempat Lahir</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.tempat_lahir || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">k. Tanggal Lahir</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.tanggal_lahir || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">l. Agama</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.agama || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">m. Berkebutuhan Khusus</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.berkebutuhan_khusus || "Tidak"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">n. Riwayat Penyakit</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.riwayat_penyakit || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">o. Alamat Tempat Tinggal</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.alamat || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">p. Alat Transportasi</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.alat_transportasi || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">q. Jenis Tinggal</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.jenis_tinggal || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">r. No HP/Telepon</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.telepon || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">s. Penerima KPS/PKH (Ya/Tidak)</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.kps || "Tidak"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">t. Penerima KIP (Ya/Tidak)</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.kip || "Tidak"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">u. Anak Keberapa</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.anak_ke || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">v. Status Yatim/Piatu</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.status_anak || "-"}</td></tr>
           </table>
 
           <!-- DATA PERIODIK -->
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr><td colspan="3" style="font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 2px;">2. DATA PERIODIK</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">a. Tinggi Badan (cm)</td><td style="width: 2%;">:</td><td>${s.tinggi || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">b. Berat Badan (kg)</td><td style="width: 2%;">:</td><td>${s.berat || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">c. Hobi</td><td style="width: 2%;">:</td><td>${s.hobi || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">d. Cita-cita</td><td style="width: 2%;">:</td><td>${s.cita_cita || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">e. No Registrasi Akta</td><td style="width: 2%;">:</td><td>${s.no_akta || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">f. Jarak ke Sekolah (km)</td><td style="width: 2%;">:</td><td>${s.jarak || "0"} km</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">g. Waktu Tempuh (menit)</td><td style="width: 2%;">:</td><td>${s.waktu_tempuh || "0"} menit</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">h. Jumlah Saudara</td><td style="width: 2%;">:</td><td>${s.jumlah_saudara || "0"}</td></tr>
+          <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+            <tr><td colspan="3" style="font-weight: 800; text-transform: uppercase; color: #1E3A8A; border-bottom: 2px solid #1E3A8A; padding-bottom: 3px; font-size: 11px;">2. DATA PERIODIK</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">a. Tinggi Badan (cm)</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.tinggi || "-"} cm</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">b. Berat Badan (kg)</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.berat || "-"} kg</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">c. Hobi</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.hobi || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">d. Cita-cita</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.cita_cita || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">e. No Registrasi Akta</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.no_akta || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">f. Jarak ke Sekolah (km)</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.jarak || "0"} km</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">g. Waktu Tempuh (menit)</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.waktu_tempuh || "0"} menit</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">h. Jumlah Saudara</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.jumlah_saudara || "0"}</td></tr>
           </table>
         </div>
 
@@ -1983,50 +2008,52 @@
         <!-- Halaman 2 -->
         <div class="print-page-break" style="margin-top: 20px;">
           <!-- DATA AYAH KANDUNG -->
-          <table style="width: 100%; margin-bottom: 15px; border-collapse: collapse;">
-            <tr><td colspan="3" style="font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 2px;">3. DATA AYAH KANDUNG</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">a. Nama Ayah</td><td style="width: 2%;">:</td><td style="font-weight: bold;">${s.ayah_nama || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">b. NIK Ayah</td><td style="width: 2%;">:</td><td>${s.ayah_nik || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">c. Pekerjaan</td><td style="width: 2%;">:</td><td>${s.ayah_pekerjaan || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">d. Tahun Lahir</td><td style="width: 2%;">:</td><td>${s.ayah_lahir || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">e. Pendidikan</td><td style="width: 2%;">:</td><td>${s.ayah_pendidikan || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">f. Penghasilan Bulanan</td><td style="width: 2%;">:</td><td>${s.ayah_penghasilan || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">g. No HP</td><td style="width: 2%;">:</td><td>${s.ayah_hp || "-"}</td></tr>
+          <table style="width: 100%; margin-bottom: 15px; border-collapse: collapse; font-size: 11px;">
+            <tr><td colspan="3" style="font-weight: 800; text-transform: uppercase; color: #1E3A8A; border-bottom: 2px solid #1E3A8A; padding-bottom: 3px; font-size: 11px;">3. DATA AYAH KANDUNG</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">a. Nama Ayah</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.ayah_nama || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">b. NIK Ayah</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.ayah_nik || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">c. Pekerjaan</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.ayah_pekerjaan || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">d. Tahun Lahir</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.ayah_lahir || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">e. Pendidikan</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.ayah_pendidikan || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">f. Penghasilan Bulanan</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.ayah_penghasilan || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">g. No HP</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.ayah_hp || "-"}</td></tr>
           </table>
 
           <!-- DATA IBU KANDUNG -->
-          <table style="width: 100%; margin-bottom: 15px; border-collapse: collapse;">
-            <tr><td colspan="3" style="font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 2px;">4. DATA IBU KANDUNG</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">a. Nama Ibu</td><td style="width: 2%;">:</td><td style="font-weight: bold;">${s.ibu_nama || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">b. NIK Ibu</td><td style="width: 2%;">:</td><td>${s.ibu_nik || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">c. Pekerjaan</td><td style="width: 2%;">:</td><td>${s.ibu_pekerjaan || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">d. Tahun Lahir</td><td style="width: 2%;">:</td><td>${s.ibu_lahir || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">e. Pendidikan</td><td style="width: 2%;">:</td><td>${s.ibu_pendidikan || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">f. Penghasilan Bulanan</td><td style="width: 2%;">:</td><td>${s.ibu_penghasilan || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">g. No HP</td><td style="width: 2%;">:</td><td>${s.ibu_hp || "-"}</td></tr>
+          <table style="width: 100%; margin-bottom: 15px; border-collapse: collapse; font-size: 11px;">
+            <tr><td colspan="3" style="font-weight: 800; text-transform: uppercase; color: #1E3A8A; border-bottom: 2px solid #1E3A8A; padding-bottom: 3px; font-size: 11px;">4. DATA IBU KANDUNG</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">a. Nama Ibu</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.ibu_nama || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">b. NIK Ibu</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.ibu_nik || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">c. Pekerjaan</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.ibu_pekerjaan || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">d. Tahun Lahir</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.ibu_lahir || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">e. Pendidikan</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.ibu_pendidikan || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">f. Penghasilan Bulanan</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.ibu_penghasilan || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">g. No HP</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.ibu_hp || "-"}</td></tr>
           </table>
 
           <!-- DATA WALI -->
-          <table style="width: 100%; margin-bottom: 15px; border-collapse: collapse;">
-            <tr><td colspan="3" style="font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 2px;">5. DATA WALI</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">a. Nama Wali</td><td style="width: 2%;">:</td><td style="font-weight: bold;">${s.wali_nama || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">b. Pekerjaan</td><td style="width: 2%;">:</td><td>${s.wali_pekerjaan || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">c. Pendidikan</td><td style="width: 2%;">:</td><td>${s.wali_pendidikan || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">d. Penghasilan Bulanan</td><td style="width: 2%;">:</td><td>${s.wali_penghasilan || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">e. No HP</td><td style="width: 2%;">:</td><td>${s.wali_hp || "-"}</td></tr>
+          <table style="width: 100%; margin-bottom: 15px; border-collapse: collapse; font-size: 11px;">
+            <tr><td colspan="3" style="font-weight: 800; text-transform: uppercase; color: #1E3A8A; border-bottom: 2px solid #1E3A8A; padding-bottom: 3px; font-size: 11px;">5. DATA WALI</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">a. Nama Wali</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.wali_nama || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">b. Pekerjaan</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.wali_pekerjaan || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">c. Pendidikan</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.wali_pendidikan || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">d. Penghasilan Bulanan</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.wali_penghasilan || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">e. No HP</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.wali_hp || "-"}</td></tr>
           </table>
 
           <!-- AKTIVITAS SMK (PKL & UKK) -->
-          <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse;">
-            <tr><td colspan="3" style="font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 2px;">6. REKAM JEJAK AKTIVITAS VOKASI (SMK)</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">a. Mitra Industri / Tempat PKL</td><td style="width: 2%;">:</td><td style="font-weight: bold;">${s.pkl_perusahaan || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">b. Nilai Akhir PKL</td><td style="width: 2%;">:</td><td>${s.pkl_nilai || "-"}</td></tr>
-            <tr><td style="width: 35%; padding: 3px 0;">c. Status Kelulusan UKK</td><td style="width: 2%;">:</td><td style="font-weight: bold;">${s.ukk_status || "-"}</td></tr>
+          <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse; font-size: 11px;">
+            <tr><td colspan="3" style="font-weight: 800; text-transform: uppercase; color: #1E3A8A; border-bottom: 2px solid #1E3A8A; padding-bottom: 3px; font-size: 11px;">6. REKAM JEJAK AKTIVITAS VOKASI (SMK)</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">a. Mitra Industri / Tempat PKL</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.pkl_perusahaan || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">b. Nilai Akhir PKL</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.pkl_nilai || "-"}</td></tr>
+            <tr><td style="width: 35%; padding: 4px 0; color: #475569; font-weight: 600;">c. Status Kelulusan UKK</td><td style="width: 2%;">:</td><td style="font-weight: bold; color: #1E3A8A;">${s.ukk_status || "-"}</td></tr>
           </table>
 
           <!-- REKAPITULASI NILAI AKADEMIK -->
-          <div style="border-top: 1px solid #000; padding-top: 10px;">
-            <h3 style="font-size: 11px; font-weight: bold; text-transform: uppercase; margin: 0 0 10px 0;">REKAPITULASI NILAI AKADEMIK</h3>
+          <div style="border-top: 2px solid #1E3A8A; padding-top: 10px;">
+            <h3 style="font-size: 11px; font-weight: bold; text-transform: uppercase; margin: 0 0 10px 0; color: #1E3A8A; font-family: 'Times New Roman', serif;">
+              REKAPITULASI NILAI AKADEMIK
+            </h3>
             ${gradeSheetsHtml}
           </div>
         </div>
@@ -2601,3 +2628,102 @@
   </script>
 </body>
 </html>
+```
+eof
+
+```javascript:Firebase Security Rules:firestore.rules
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Koleksi data utama siswa SMK
+    match /students/{nisn} {
+      // Admin yang login melalui Firebase Auth bisa membaca dan memanipulasi semua dokumen
+      allow read, write: if request.auth != null;
+      // Siswa non-Auth hanya bisa melihat dokumen miliknya jika password yang dikirimkan cocok
+      allow read: if resource.data.password == request.headers.password;
+    }
+
+    // Koleksi Master Mata Pelajaran & Konfigurasi Sekolah
+    match /metadata/{configId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
+```
+eof
+
+```markdown:Panduan Penggunaan:panduan.md
+# Panduan Implementasi Buku Induk Digital SMK (PWA)
+
+Aplikasi ini menggunakan arsitektur **Serverless** murni satu file HTML. Seluruh penyimpanan data terhubung ke **Firebase Firestore**, dan aset foto terhubung otomatis ke **Google Drive** menggunakan jembatan Google Apps Script.
+
+---
+
+## 1. Setup Jembatan Google Drive (Google Apps Script)
+Untuk menghindari penyimpanan berbayar di Firebase Storage, ikuti langkah berikut agar file foto tersimpan langsung ke akun Google Drive Anda secara gratis:
+
+1. Buka [Google Drive](https://drive.google.com/) Anda, lalu buatlah sebuah folder baru (misal bernama `Foto Buku Induk SMK`).
+2. Masuk ke dalam folder tersebut, salin **Folder ID** dari tautan di bilah alamat browser Anda (Folder ID adalah bagian akhir tautan setelah `/folders/YOUR_FOLDER_ID`).
+3. Kunjungi [Google Apps Script](https://script.google.com/), lalu klik **New Project**.
+4. Hapus seluruh kode bawaan, kemudian tempelkan skrip di bawah ini:
+
+```javascript
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var folderId = "TEMPEL_FOLDER_ID_GOOGLE_DRIVE_ANDA_DI_SINI"; 
+    var folder = DriveApp.getFolderById(folderId);
+    
+    var contentType = data.mimeType;
+    var base64Data = Utilities.base64Decode(data.base64);
+    var blob = Utilities.newBlob(base64Data, contentType, data.filename);
+    
+    var file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    
+    var directUrl = "https://lh3.googleusercontent.com/d/" + file.getId();
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      "status": "success",
+      "url": directUrl
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({
+      "status": "error",
+      "message": error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+```
+
+5. Ganti `"TEMPEL_FOLDER_ID_GOOGLE_DRIVE_ANDA_DI_SINI"` dengan Folder ID yang telah Anda salin pada langkah ke-2.
+6. Klik tombol **Deploy** > **New Deployment**.
+7. Pilih jenis deployment **Web App**.
+8. Ubah pengaturannya menjadi:
+   - **Execute as:** `Me` (Akun Google Anda)
+   - **Who has access:** `Anyone` (agar aplikasi web Anda dapat mengirim data tanpa login akun Google tambahan)
+9. Klik **Deploy**, beri izin otorisasi keamanan, lalu salin **Web App URL** yang dihasilkan.
+10. Tempelkan tautan tersebut ke dalam input **Google Apps Script Web App URL** di tab **Pengaturan** aplikasi Buku Induk SMK Anda.
+
+---
+
+## 2. Cara Penyematan ke Blogger / Blogspot
+Aplikasi Buku Induk ini dirancang satu file penuh sehingga sangat mudah dipasang langsung ke Blogspot Anda:
+
+1. Masuk ke dasbor **Blogger** Anda.
+2. Pilih menu **Tata Letak (Layout)**.
+3. Klik **Tambahkan Gadget (Add a Widget)** di bagian tubuh halaman utama, lalu pilih **HTML/JavaScript**.
+4. Salin seluruh isi berkas `buku_induk_smk.html` dan tempelkan ke dalam kotak konten widget tersebut.
+5. Klik **Simpan**.
+6. Selesai! Buku Induk PWA berlatar belakang Dapodik bersih kini telah tayang langsung di blog Anda.
+```
+eof
+
+### Ringkasan Pembaruan Berkas:
+*   **Warna & Estetika SMK**: Seluruh visual merah kini berganti menjadi **Biru Navy-Abu-Abu** khas seragam kejuruan SMK, lengkap dengan visual latar belakang edukasi Unsplash premium pada form login.
+*   **Perbaikan Event Propagation**: Menambahkan `event.stopPropagation()` pada tombol aksi agar navigasi perpindahan form saat Edit atau Delete tidak lagi tertabrak dengan event cetak detail.
+*   **Tampilan KOP Sejajar Proporsional**: KOP Surat sekarang berbentuk tabel/flexbox terisolasi sehingga logo sekolah di sisi kiri tidak lagi tumpang tindih dengan teks KOP dan baris tebal pemisah bab.
+*   **Kualitas Format Cetak (PDF)**: Pratinjau cetak Buku Induk didesain ulang agar menghasilkan format yang presisi dengan teks label abu-abu, titik dua yang lurus sejajar, serta isi nilai yang tebal dan berwarna biru navy elegan khas sekolah formal. Pas foto 3x4 diletakkan secara teratur di sisi kanan atas lengkap dengan bingkai ganda biru tua.
