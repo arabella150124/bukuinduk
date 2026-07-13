@@ -231,7 +231,6 @@
     <!-- MAIN CONTENT WINDOW -->
     <main class="main-content min-h-screen flex flex-col p-4 lg:p-8">
       
-      <!-- Top Dynamic Header block -->
       <header class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4 glass-card p-5 rounded-2xl shadow-sm">
         <div class="flex items-center gap-3">
           <img id="header-school-logo" src="https://via.placeholder.com/150" class="w-12 h-12 object-cover rounded-xl border" alt="School">
@@ -327,6 +326,7 @@
         </div>
       </section>
 
+      <!-- TAB 2: DATA SISWA TABLE (Image 5 & Image 27e683) -->
       <section id="tab-data-siswa" class="tab-content hidden space-y-4">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <h2 class="text-xl font-black text-slate-950 tracking-tight">Data Buku Induk</h2>
@@ -386,6 +386,7 @@
         </div>
       </section>
 
+      <!-- TAB 3: TAMBAH DATA SISWA (Image 4 + Periodik & Orang Tua/Wali Expansion) -->
       <section id="tab-tambah-data" class="tab-content hidden space-y-6">
         <div class="pb-3 border-b border-slate-100">
           <h2 id="tambah-siswa-title" class="text-xl font-black text-slate-950 tracking-tight">Tambah Data Siswa Baru</h2>
@@ -543,7 +544,7 @@
             </div>
           </div>
 
-          <!-- DATA PERIODIK SECTION -->
+          <!-- DATA PERIODIK SECTION (Image 27e243) -->
           <div class="p-6 bg-white rounded-3xl border border-slate-100 space-y-4">
             <h3 class="text-xs font-black text-blue-brand uppercase tracking-wider pb-2 border-b border-slate-100">2. DATA PERIODIK</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -582,7 +583,7 @@
             </div>
           </div>
 
-          <!-- DATA AYAH KANDUNG SECTION -->
+          <!-- DATA AYAH KANDUNG SECTION (Image 27e286) -->
           <div class="p-6 bg-white rounded-3xl border border-slate-100 space-y-4">
             <h3 class="text-xs font-black text-blue-brand uppercase tracking-wider pb-2 border-b border-slate-100">3. DATA AYAH KANDUNG</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -617,7 +618,7 @@
             </div>
           </div>
 
-          <!-- DATA IBU KANDUNG SECTION -->
+          <!-- DATA IBU KANDUNG SECTION (Image 27e286) -->
           <div class="p-6 bg-white rounded-3xl border border-slate-100 space-y-4">
             <h3 class="text-xs font-black text-blue-brand uppercase tracking-wider pb-2 border-b border-slate-100">4. DATA IBU KANDUNG</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -652,7 +653,7 @@
             </div>
           </div>
 
-          <!-- DATA WALI SECTION -->
+          <!-- DATA WALI SECTION (Image 27e286) -->
           <div class="p-6 bg-white rounded-3xl border border-slate-100 space-y-4">
             <h3 class="text-xs font-black text-blue-brand uppercase tracking-wider pb-2 border-b border-slate-100">5. DATA WALI</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -679,6 +680,7 @@
             </div>
           </div>
 
+          <!-- VOCATIONAL SMK SPECIFIC METADATA -->
           <div class="p-6 bg-white rounded-3xl border border-slate-100 space-y-4">
             <h3 class="text-xs font-black text-blue-brand uppercase tracking-wider pb-2 border-b border-slate-100">6. AKTIVITAS KHUSUS SMK</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -711,6 +713,7 @@
         </form>
       </section>
 
+      <!-- TAB 4: MASTER MATA PELAJARAN (Image 3) -->
       <section id="tab-master-mapel" class="tab-content hidden space-y-6">
         <h2 class="text-xl font-black text-slate-950 tracking-tight">Master Mata Pelajaran</h2>
 
@@ -792,6 +795,7 @@
         </div>
       </section>
 
+      <!-- TAB 5: INPUT NILAI AKADEMIK (Image 2) -->
       <section id="tab-nilai-akademik" class="tab-content hidden space-y-6">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <h2 class="text-xl font-black text-slate-950 tracking-tight">Input Nilai Akademik</h2>
@@ -1005,6 +1009,7 @@
     </main>
   </div>
 
+  <!-- LOGIN SECTION WITH EDUCATION THEME UNSPLASH BG -->
   <div id="login-container" class="min-h-screen w-full flex items-center justify-center p-4 bg-cover bg-center relative" style="background-image: url('https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80');">
     <div class="absolute inset-0 bg-slate-950/45 backdrop-blur-sm z-0"></div>
     <div class="w-full max-w-md bg-white/95 p-8 rounded-3xl border border-slate-100 shadow-2xl relative z-10 space-y-6">
@@ -1057,6 +1062,7 @@
     </div>
   </div>
 
+  <!-- BOOK INDUK PRINT MODAL PREVIEW (A4 EXACT ALIGNMENT) -->
   <div id="student-detail-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm overflow-y-auto">
     <div class="bg-white w-full max-w-4xl rounded-3xl p-6 shadow-2xl my-8 relative flex flex-col max-h-[90vh]">
       <div class="flex items-center justify-between pb-3 border-b border-slate-200 no-print">
